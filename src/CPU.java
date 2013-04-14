@@ -66,5 +66,9 @@ public class CPU {
 	public Map<String, ArrayList<TemperatureData>> getMap() {
 		return coreMap;
 	}
+	
+	public ArrayList<TemperatureData> getDatas(String coreName) {
+		return coreMap.get(coreName);
+	}
 
 }
