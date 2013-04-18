@@ -72,11 +72,11 @@ public class Scheduling implements Runnable {
 
 		try {
 
-//			try {
-//				twitter.tweet("【自動】 CPU温度の計測を開始しました。(" + new Date() + ")");
-//			} catch(TwitterException e) {
-//				System.err.println("Tweet failed");
-//			}
+			try {
+				twitter.tweet("【自動】 CPU温度の計測を開始しました。(" + new Date() + ")");
+			} catch(TwitterException e) {
+				System.err.println("Tweet failed");
+			}
 
 			while (true) {
 				Calendar startTime = Calendar.getInstance();
