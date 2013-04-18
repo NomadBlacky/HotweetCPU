@@ -1,0 +1,152 @@
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import twitter4j.TwitterException;
+
+
+public class Scheduling implements Runnable {
+
+	private CPU cpu;
+	private TwitterAccess twitter;
+	private int tweet_min;
+	private int update_sec;
+	private boolean running;
+
+	public Scheduling() throws IOException, InterruptedException, TwitterException {
+		cpu = new CPU();
+		twitter = new TwitterAccess();
+		twitter.setAccount();
+		running = true;
+		this.setDefault();
+	}
+
+	public Scheduling(TwitterAccess access) throws IOException, InterruptedException {
+		cpu = new CPU();
+		twitter = access;
+		running = true;
+		this.setDefault();
+	}
+
+	/**
+	 * 定期ツイートする間隔（分）、CPU温度を取得する間隔（秒）を設定
+	 * @param cpu
+	 * @param tweet(min)
+	 * @param update(sec)
+	 */
+	public Scheduling(CPU c, TwitterAccess access, int tweet, int update) {
+		cpu = c;
+		twitter = access;
+		tweet_min = tweet;
+		update_sec = update;
+		running = true;
+	}
+
+	public void setDefault() {
+		tweet_min = 60;
+		update_sec = 1;
+	}
+	public int getTweet_min() {
+		return tweet_min;
+	}
+
+	public void setTweet_min(int tweet_min) {
+		this.tweet_min = tweet_min;
+	}
+
+	public int getUpdate_sec() {
+		return update_sec;
+	}
+
+	public void setUpdate_sec(int update_sec) {
+		this.update_sec = update_sec;
+	}
+
+	@Override
+	public void run() {
+
+		try {
+
+			try {
+				twitter.tweet("【自動】 CPU温度の計測を開始しました。");
+			} catch(TwitterException e) {
+				System.err.println("Tweet failed");
+			}
+
+			while (true) {
+				Calendar startTime = Calendar.getInstance();
+				Calendar endTime = Calendar.getInstance();
+				endTime.add(Calendar.MINUTE, tweet_min);
+
+				// ツイート時間を過ぎるまで繰り返す
+				while(endTime.before(Calendar.getInstance())) {
+
+					cpu.update();
+					Thread.sleep(update_sec * 1000);
+					// stopRun()で抜ける
+					if(running == false) {
+						return;
+					}
+				}
+
+				try {
+					// 計測結果をツイート
+					this.tweet(startTime, endTime);
+				} catch (TwitterException e) {
+					System.err.println("Tweet failed");
+				}
+
+			}
+
+		} catch (InterruptedException e) {
+			System.err.println("Interrupted");
+		} catch (IOException e) {
+			System.err.println("I/O Exception");
+		}
+
+	}
+
+	public void stopRun() {
+		running = false;
+	}
+
+	private void tweet(Calendar st, Calendar end) throws TwitterException {
+
+		String message = "";
+
+		// 計測開始時刻と終了時刻を取得
+		String stTime = String.valueOf(st.get(Calendar.HOUR_OF_DAY)) + ":" +
+				String.valueOf(st.get(Calendar.MINUTE));
+		String endTime = String.valueOf(end.get(Calendar.HOUR_OF_DAY)) + ":" +
+				String.valueOf(end.get(Calendar.MINUTE));
+
+		// 時刻を追記
+		message = message.concat(String.format("[result:%s~%s]\n", stTime, endTime));
+
+		// Mapからiteratorを取得
+		Map<String, ArrayList<TemperatureData>> map = cpu.getMap();
+		Set<Entry<String, ArrayList<TemperatureData>>> set = map.entrySet();
+		Iterator<Entry<String, ArrayList<TemperatureData>>> iterator = set.iterator();
+
+		while(iterator.hasNext()) {
+
+			Entry<String, ArrayList<TemperatureData>> entry = iterator.next();
+			String name = entry.getKey();
+			message = message.concat(name + " => ");
+
+			// min,ave,max を取得
+			double[] result = cpu.getResult3(name);
+			// 値を追記
+			message = message.concat(String.format("min:%d°C ave:%d°C max:%d°C\n",
+					result[0], result[1], result[2]));
+		}
+
+		// 結果をツイート
+		twitter.tweet(message);
+	}
+
+}
