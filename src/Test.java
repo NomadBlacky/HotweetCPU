@@ -8,15 +8,14 @@ public class Test {
 
 	/**
 	 * @param args
-	 * @throws IOException 
-	 * @throws TwitterException 
+	 * @throws IOException
+	 * @throws TwitterException
 	 */
 	public static void main(String[] args) throws TwitterException, IOException {
 
-		PostingTweet posting = new PostingTweet();
-		posting.setAccount(PostingTweet.GUI_MODE);
+		System.out.printf("%.2f\n", 10.5);
+		System.out.printf("%02d", 1);
 		
-		posting.tweet("tweet test : " + new Date());
 	}
 
 }
