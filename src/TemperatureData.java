@@ -1,11 +1,13 @@
 import java.util.Date;
 
-
+/**
+ * CPU温度データ(１件分)
+ */
 public class TemperatureData {
 
 	private Date date;
 	private double temperature;
-	
+
 	public TemperatureData(double temp) {
 		date = new Date();
 		temperature = temp;
@@ -26,6 +28,6 @@ public class TemperatureData {
 	public void setTemperature(double temperature) {
 		this.temperature = temperature;
 	}
-	
-	
+
+
 }

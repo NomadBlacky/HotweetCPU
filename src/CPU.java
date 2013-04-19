@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,23 +85,27 @@ public class CPU {
 		ave = max = min = 0;
 		Iterator<TemperatureData> iterator = datas.iterator();
 
-		// 初期化
+		// はじめの要素で初期化
 		if(iterator.hasNext()) {
 			ave = max = min = iterator.next().getTemperature();
 		}
+		// 温度データの最後まで繰り返す
 		while (iterator.hasNext()) {
 			double data = iterator.next().getTemperature();
 			if(max < data) {
-				max = data;
+				max = data;	// 最大
 			}
 			if(min > data) {
-				min = data;
+				min = data;	// 最小
 			}
 			ave += data;
 		}
-		ave = ave / datas.size();
-		double[] result = {min, ave, max};
 
+		ave = ave / datas.size();	// 平均
+
+		// 最小、平均、最大の順で返す
+		double[] result = {min, ave, max};
 		return result;
+
 	}
 }

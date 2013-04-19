@@ -18,7 +18,7 @@ public class Scheduling implements Runnable {
 	private int update_sec;
 	private boolean running;
 
-	public Scheduling() throws IOException, InterruptedException, TwitterException {
+	public Scheduling() throws InterruptedException, TwitterException, IOException {
 		cpu = new CPU();
 		twitter = new TwitterAccess();
 		twitter.setAccount();
@@ -39,12 +39,11 @@ public class Scheduling implements Runnable {
 	 * @param tweet(min)
 	 * @param update(sec)
 	 */
-	public Scheduling(CPU c, TwitterAccess access, int tweet, int update) {
+	public Scheduling(CPU c, TwitterAccess access) {
 		cpu = c;
 		twitter = access;
-		tweet_min = tweet;
-		update_sec = update;
 		running = true;
+		this.setDefault();
 	}
 
 	public void setDefault() {
@@ -73,6 +72,7 @@ public class Scheduling implements Runnable {
 		try {
 
 			try {
+				// 計測開始のツイート
 				twitter.tweet("【自動】 CPU温度の計測を開始しました。(" + new Date() + ")");
 			} catch(TwitterException e) {
 				System.err.println("Tweet failed");
@@ -86,8 +86,11 @@ public class Scheduling implements Runnable {
 				// ツイート時間を過ぎるまで繰り返す
 				while(endTime.after(Calendar.getInstance())) {
 
+					// CPU温度を更新
 					cpu.update();
+					// 更新待機(秒)
 					Thread.sleep(update_sec * 1000);
+
 					// stopRun()で抜ける
 					if(running == false) {
 						return;
@@ -111,6 +114,9 @@ public class Scheduling implements Runnable {
 
 	}
 
+	/**
+	 * スレッドの終了
+	 */
 	public void stopRun() {
 		running = false;
 	}
@@ -120,7 +126,7 @@ public class Scheduling implements Runnable {
 		String message = "";
 
 		// 計測開始時刻と終了時刻を取得
-		String stTime = 
+		String stTime =
 				String.format("%02d", st.get(Calendar.HOUR_OF_DAY)) + ":" +
 				String.format("%02d", st.get(Calendar.MINUTE));
 		String endTime =
@@ -139,6 +145,7 @@ public class Scheduling implements Runnable {
 
 			Entry<String, ArrayList<TemperatureData>> entry = iterator.next();
 			String name = entry.getKey();
+			// Core名を追記
 			message = message.concat(name + " => ");
 
 			// min,ave,max を取得

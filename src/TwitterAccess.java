@@ -14,28 +14,33 @@ import twitter4j.auth.RequestToken;
 
 public class TwitterAccess {
 
-	public static int GUI_MODE = 0;
-	public static int CHARACTER_MODE = 1;
-
+	// Consumer key
 	private static final String CONSUMER_KEY = "PF8CZAMRTjB0pFDYDE3Fdg";
+	// Consumer select
 	private static final String CONSUMER_SELECT = "N5jU1wGJLa0IJiHKgDNMe0Ydp1Ig2BqHZpQpHVl264";
 
 	Twitter twitter;
 
+	/**
+	 * Twitterインスタンスを取得
+	 */
 	public TwitterAccess() {
 		twitter = TwitterFactory.getSingleton();
 	}
 
 	public void setAccount() throws TwitterException, IOException {
 
+		// OAuth用の設定
 		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SELECT);
+		// リクエストトークンを取得
 		RequestToken requestToken = twitter.getOAuthRequestToken();
 
+		// OAuthでログイン
 		this.loginOAuth(requestToken);
 
 	}
 
-	private AccessToken loginOAuth(RequestToken requestToken) throws IOException, TwitterException {
+	private AccessToken loginOAuth(RequestToken requestToken) throws TwitterException, IOException {
 
 		// OSデフォルトのブラウザを起動
 		Desktop desktop = Desktop.getDesktop();
@@ -56,6 +61,11 @@ public class TwitterAccess {
 		return accessToken;
 	}
 
+	/**
+	 * TwitterにPOST
+	 * @param message
+	 * @throws TwitterException
+	 */
 	public void tweet(String message) throws TwitterException {
 
 		// 140文字以上なら文字を削る

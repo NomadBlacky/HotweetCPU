@@ -40,11 +40,16 @@ public class HotweetCPU {
 	public static void main(String[] args) {
 
 		try {
+
 			TwitterAccess twitter = new TwitterAccess();
+			// アカウント設定
 			twitter.setAccount();
 
 			Scheduling scheduling = new Scheduling(twitter);
-			scheduling.setTweet_min(1);
+			// ツイート間隔(分)の設定
+			scheduling.setTweet_min(15);
+
+			// 温度計測スレッドの開始
 			Thread measurement = new Thread(scheduling);
 			measurement.start();
 
@@ -55,5 +60,6 @@ public class HotweetCPU {
 		} catch (TwitterException e) {
 
 		}
+
 	}
 }
